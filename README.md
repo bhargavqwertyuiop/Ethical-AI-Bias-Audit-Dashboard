@@ -17,7 +17,21 @@ A comprehensive tool for detecting, analyzing, and mitigating bias in AI systems
 
 ## 🚀 Quick Start
 
-### Installation
+### Option 1: Using Docker (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/ethical-ai-bias-audit-dashboard.git
+cd ethical-ai-bias-audit-dashboard
+
+# Deploy with Docker Compose
+docker-compose up -d
+
+# Access the application
+open http://localhost:8501
+```
+
+### Option 2: Local Installation
 
 1. Clone the repository:
 ```bash
@@ -36,6 +50,16 @@ streamlit run dashboard.py
 ```
 
 4. Open your browser to `http://localhost:8501`
+
+### Option 3: Using Build Scripts
+
+```bash
+# Build and run using Docker
+./scripts/build.sh latest run
+
+# Deploy to different environments
+./scripts/deploy.sh production deploy
+```
 
 ### Basic Usage
 
@@ -174,18 +198,27 @@ print('Bias detected:', summary['bias_detected'])
 
 ```
 ethical-ai-bias-audit-dashboard/
-├── src/
+├── src/                       # Core application modules
 │   ├── bias_detector.py       # Core bias detection engine
 │   ├── mitigation_engine.py   # Bias mitigation recommendations
 │   ├── explainable_ai.py      # XAI analysis using SHAP/LIME
 │   └── __init__.py
-├── dashboard.py               # Main Streamlit dashboard
-├── examples/
-│   └── bias_audit_demo.ipynb  # Comprehensive demo notebook
-├── data/
-│   └── sample_hiring_data.csv # Sample dataset
-├── requirements.txt           # Dependencies
-└── README.md
+├── scripts/                   # Deployment and build scripts
+│   ├── build.sh              # Docker build script
+│   └── deploy.sh             # Environment deployment script
+├── .streamlit/               # Streamlit configuration
+│   └── config.toml           # App configuration
+├── examples/                 # Demo and examples
+│   └── bias_audit_demo.ipynb # Comprehensive demo notebook
+├── data/                     # Sample datasets
+│   └── sample_hiring_data.csv
+├── dashboard.py              # Main Streamlit dashboard
+├── docker-compose.yml        # Docker Compose configuration
+├── Dockerfile               # Docker image definition
+├── nginx.conf               # Nginx configuration for production
+├── requirements.txt         # Python dependencies
+├── DOCKER.md               # Docker deployment guide
+└── README.md               # Main documentation
 ```
 
 ## 🔍 Bias Detection Methods
