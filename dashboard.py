@@ -205,6 +205,13 @@ def show_data_upload_page():
             
             st.session_state.data = data
             
+            # Clear previous protected attributes and target column when new data is loaded
+            # They will be re-selected by the user for the new dataset
+            if hasattr(st.session_state, 'protected_attributes'):
+                st.session_state.protected_attributes = []
+            if hasattr(st.session_state, 'target_column'):
+                delattr(st.session_state, 'target_column')
+            
             st.success(f"✅ Successfully loaded {len(data)} rows and {len(data.columns)} columns")
             
             # Data preview
@@ -268,13 +275,32 @@ def show_data_upload_page():
             st.markdown("### 🛡️ Protected Attributes Selection")
             st.markdown("Select columns that represent protected attributes (e.g., gender, race, age)")
             
+            # Show available columns and suggest potential protected attributes
+            with st.expander("💡 Need help identifying protected attributes?", expanded=False):
+                st.markdown("""
+                **Common protected attributes include:**
+                - **Gender/Sex**: gender, sex, male_female, etc.
+                - **Race/Ethnicity**: race, ethnicity, ethnic_group, etc.
+                - **Age**: age, age_group, age_category, etc.
+                - **Religion**: religion, religious_affiliation, etc.
+                - **Disability**: disability, disabled, disability_status, etc.
+                - **Sexual Orientation**: sexual_orientation, orientation, etc.
+                
+                **Available columns in your dataset:**
+                """)
+                st.write(", ".join(f"`{col}`" for col in data.columns.tolist()))
+            
             # Get previously selected attributes if any
             current_protected_attrs = getattr(st.session_state, 'protected_attributes', [])
             
+            # Filter current protected attributes to only include those that exist in the current dataset
+            available_columns = data.columns.tolist()
+            valid_current_attrs = [attr for attr in current_protected_attrs if attr in available_columns]
+            
             protected_attrs = st.multiselect(
                 "Protected Attributes",
-                options=data.columns.tolist(),
-                default=current_protected_attrs,
+                options=available_columns,
+                default=valid_current_attrs,
                 help="These are attributes that should not be used for discrimination (e.g., gender, race, age)"
             )
             
@@ -346,6 +372,10 @@ def show_data_upload_page():
             
         except Exception as e:
             st.error(f"❌ Error loading file: {str(e)}")
+            st.info("💡 **Troubleshooting tips:**\n- Check that your file is a valid CSV, Excel, or JSON format\n- Ensure the file is not corrupted\n- Try uploading a smaller file if it's very large\n- Make sure column names don't contain special characters")
+            # Clear any partially loaded data
+            if hasattr(st.session_state, 'data'):
+                st.session_state.data = None
     
     else:
         # Show sample data option
@@ -353,9 +383,11 @@ def show_data_upload_page():
         if st.button("Load Sample Dataset"):
             sample_data = generate_sample_data()
             st.session_state.data = sample_data
-            st.session_state.protected_attributes = ['gender', 'race']
-            st.session_state.target_column = 'approved'
-            st.success("✅ Sample dataset loaded successfully!")
+            # Clear previous selections when loading new data
+            st.session_state.protected_attributes = []
+            if hasattr(st.session_state, 'target_column'):
+                delattr(st.session_state, 'target_column')
+            st.success("✅ Sample dataset loaded successfully! Please select protected attributes below.")
             st.rerun()
 
 def show_bias_detection_page():
