@@ -30,6 +30,9 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy application code
 COPY . .
 
+# Run tests to validate the application
+RUN python test_app.py
+
 # Create a non-root user for security
 RUN useradd --create-home --shell /bin/bash appuser \
     && chown -R appuser:appuser /app

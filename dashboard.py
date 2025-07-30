@@ -325,7 +325,7 @@ def show_data_upload_page():
             st.session_state.protected_attributes = ['gender', 'race']
             st.session_state.target_column = 'approved'
             st.success("✅ Sample dataset loaded successfully!")
-            st.experimental_rerun()
+            st.rerun()
 
 def show_bias_detection_page():
     """Display the bias detection analysis page."""

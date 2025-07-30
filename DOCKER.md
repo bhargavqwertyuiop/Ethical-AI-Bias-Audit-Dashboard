@@ -430,6 +430,33 @@ docker ps -a
 docker inspect bias-audit-dashboard
 ```
 
+#### Streamlit AttributeError: 'experimental_rerun'
+
+If you see an error about `st.experimental_rerun()`, this is due to deprecated Streamlit functions:
+
+```bash
+# Solution 1: Rebuild with latest image
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+
+# Solution 2: Update Streamlit version
+pip install --upgrade streamlit>=1.28.0
+```
+
+#### Sample Data Loading Issues
+
+```bash
+# Test the application components
+python test_app.py
+
+# Check if sample data exists
+ls -la data/
+
+# Verify CSV format
+head data/sample_hiring_data.csv
+```
+
 #### Out of Memory
 
 ```bash

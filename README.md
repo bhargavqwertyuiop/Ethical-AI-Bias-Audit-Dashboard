@@ -367,6 +367,40 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### AttributeError: 'experimental_rerun' 
+
+If you see this error when trying the sample data:
+
+```bash
+# Quick fix - run the automated fix script
+./scripts/fix-common-issues.sh streamlit
+
+# Or manually update Streamlit
+pip install --upgrade streamlit>=1.28.0
+
+# For Docker users - rebuild the container
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+#### Other Issues
+
+```bash
+# Run comprehensive health check
+python test_app.py
+
+# Fix all common issues automatically
+./scripts/fix-common-issues.sh all
+
+# Check application logs
+docker-compose logs -f
+```
+
 ## 🙏 Acknowledgments
 
 - [Fairlearn](https://fairlearn.org/) for fairness metrics and algorithms
@@ -377,6 +411,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
+If you encounter issues:
+
+1. Run the automated fix: `./scripts/fix-common-issues.sh`
+2. Check the [Troubleshooting](#troubleshooting) section above
+3. Run the test suite: `python test_app.py`
+4. Review application logs: `docker-compose logs -f`
+5. Check our [GitHub Issues](https://github.com/your-username/ethical-ai-bias-audit-dashboard/issues)
+6. Join our [Community Discussions](https://github.com/your-username/ethical-ai-bias-audit-dashboard/discussions)
+
+**Contact Information:**
 - 📧 Email: support@bias-audit-dashboard.com
 - 🐛 Issues: [GitHub Issues](https://github.com/your-username/ethical-ai-bias-audit-dashboard/issues)
 - 💬 Discussions: [GitHub Discussions](https://github.com/your-username/ethical-ai-bias-audit-dashboard/discussions)
