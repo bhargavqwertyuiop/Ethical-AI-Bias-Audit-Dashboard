@@ -190,6 +190,18 @@ def show_data_upload_page():
                 data = pd.read_excel(uploaded_file)
             elif uploaded_file.name.endswith('.json'):
                 data = pd.read_json(uploaded_file)
+            else:
+                st.error("❌ Unsupported file format. Please upload CSV, Excel, or JSON files.")
+                return
+            
+            # Validate data
+            if data.empty:
+                st.error("❌ The uploaded file is empty.")
+                return
+            
+            if len(data.columns) < 2:
+                st.error("❌ Dataset must have at least 2 columns for bias analysis.")
+                return
             
             st.session_state.data = data
             
@@ -217,14 +229,23 @@ def show_data_upload_page():
             
             with col1:
                 st.markdown("#### Data Types")
-                dtype_counts = data.dtypes.value_counts()
-                fig = px.pie(
-                    values=dtype_counts.values,
-                    names=dtype_counts.index,
-                    title="Distribution of Data Types"
-                )
-                fig.update_layout(height=400)
-                st.plotly_chart(fig, use_container_width=True)
+                try:
+                    dtype_counts = data.dtypes.value_counts()
+                    # Convert dtype names to strings to avoid JSON serialization issues
+                    dtype_names = [str(dtype) for dtype in dtype_counts.index]
+                    fig = px.pie(
+                        values=dtype_counts.values,
+                        names=dtype_names,
+                        title="Distribution of Data Types"
+                    )
+                    fig.update_layout(height=400)
+                    st.plotly_chart(fig, use_container_width=True)
+                except Exception as e:
+                    st.error(f"❌ Error displaying data types: {str(e)}")
+                    # Fallback: show data types as text
+                    st.write("**Data Types:**")
+                    for col, dtype in data.dtypes.items():
+                        st.write(f"- {col}: {str(dtype)}")
             
             with col2:
                 st.markdown("#### Missing Values")
@@ -247,15 +268,25 @@ def show_data_upload_page():
             st.markdown("### 🛡️ Protected Attributes Selection")
             st.markdown("Select columns that represent protected attributes (e.g., gender, race, age)")
             
+            # Get previously selected attributes if any
+            current_protected_attrs = getattr(st.session_state, 'protected_attributes', [])
+            
             protected_attrs = st.multiselect(
                 "Protected Attributes",
                 options=data.columns.tolist(),
-                help="These are attributes that should not be used for discrimination"
+                default=current_protected_attrs,
+                help="These are attributes that should not be used for discrimination (e.g., gender, race, age)"
             )
             
+            # Update session state
+            st.session_state.protected_attributes = protected_attrs
+            
             if protected_attrs:
-                st.session_state.protected_attributes = protected_attrs
+                st.success(f"✅ Selected {len(protected_attrs)} protected attribute(s): {', '.join(protected_attrs)}")
+            else:
+                st.info("ℹ️ Please select at least one protected attribute to enable bias detection.")
                 
+            if protected_attrs:
                 # Show distribution of protected attributes
                 st.markdown("#### Protected Attribute Distributions")
                 
@@ -341,7 +372,14 @@ def show_bias_detection_page():
     target_col = getattr(st.session_state, 'target_column', None)
     
     if not protected_attrs:
-        st.warning("⚠️ Please select protected attributes first in the Data Upload section.")
+        st.warning("⚠️ Please select protected attributes first in the Data Upload & Analysis section.")
+        st.info("💡 **How to fix this:**\n\n1. Go to the **Data Upload & Analysis** section using the sidebar\n2. Upload your dataset\n3. Select one or more **Protected Attributes** (e.g., gender, race, age)\n4. Return to this section to run bias detection")
+        
+        # Show available columns if data exists
+        if hasattr(st.session_state, 'data') and st.session_state.data is not None:
+            st.markdown("**Available columns in your dataset:**")
+            cols = st.session_state.data.columns.tolist()
+            st.write(", ".join(cols))
         return
     
     # Bias detection controls
