@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  bias-audit-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ethical-ai-bias-audit
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    volumes:
+      # Mount data directory for persistent data storage
+      - ./data:/app/data:ro
+      # Mount uploads directory for user uploads (optional)
+      - uploads_data:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - bias-audit-network
+
+  # Optional: Add a reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: bias-audit-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # For SSL certificates
+    depends_on:
+      - bias-audit-dashboard
+    restart: unless-stopped
+    networks:
+      - bias-audit-network
+    profiles:
+      - production
+
+volumes:
+  uploads_data:
+    driver: local
+
+networks:
+  bias-audit-network:
+    driver: bridge
